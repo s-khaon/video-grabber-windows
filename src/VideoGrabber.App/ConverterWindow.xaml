@@ -1,0 +1,138 @@
+<Window x:Class="VideoGrabber.App.ConverterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="m3u8 转 MP4"
+        Height="720"
+        Width="820"
+        MinHeight="560"
+        MinWidth="680"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource CanvasBrush}"
+        Icon="Assets/app.ico">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="m3u8 转 MP4" FontSize="20" FontWeight="SemiBold" />
+            <TextBlock Style="{StaticResource Caption}" Margin="0,6,0,0"
+                       Text="支持网络 m3u8 与本地播放列表。直接封装不重新编码；编码不兼容时再改用转码（H.264 / AAC）。" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="输入" />
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,8">
+                            <RadioButton x:Name="RemoteModeRadio" Content="网络地址" IsChecked="True" GroupName="Source"
+                                         Checked="SourceMode_Changed" />
+                            <RadioButton x:Name="LocalModeRadio" Content="本地文件" GroupName="Source" Margin="18,0,0,0"
+                                         Checked="SourceMode_Changed" />
+                        </StackPanel>
+
+                        <StackPanel x:Name="RemotePanel">
+                            <TextBlock Style="{StaticResource Caption}" Text="m3u8 地址" />
+                            <TextBox x:Name="RemoteUrlBox" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <StackPanel x:Name="LocalPanel" Visibility="Collapsed">
+                            <TextBlock Style="{StaticResource Caption}" Text="本地 m3u8 文件或目录" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="LocalPathBox" />
+                                <Button Grid.Column="1" Style="{StaticResource BaseButton}" Content="选择…" Margin="8,0,0,0"
+                                        Click="BrowseLocal_Click" />
+                            </Grid>
+                            <TextBlock Style="{StaticResource Caption}" Text="分片目录（留空表示与 m3u8 同目录）" Margin="0,10,0,0" />
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="FragmentDirectoryBox" />
+                                <Button Grid.Column="1" Style="{StaticResource BaseButton}" Content="选择…" Margin="8,0,0,0"
+                                        Click="BrowseFragment_Click" />
+                            </Grid>
+                        </StackPanel>
+
+                        <TextBlock Style="{StaticResource Caption}" Text="Referer（可选，页面地址）" Margin="0,10,0,0" />
+                        <TextBox x:Name="RefererBox" Margin="0,4,0,0" />
+                        <TextBlock Style="{StaticResource Caption}" Text="User-Agent（可选）" Margin="0,10,0,0" />
+                        <TextBox x:Name="UserAgentBox" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="输出" />
+                        <TextBlock Style="{StaticResource Caption}" Text="保存目录" Margin="0,10,0,0" />
+                        <Grid Margin="0,4,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="OutputDirectoryBox" />
+                            <Button Grid.Column="1" Style="{StaticResource BaseButton}" Content="选择…" Margin="8,0,0,0"
+                                    Click="BrowseOutput_Click" />
+                        </Grid>
+                        <TextBlock Style="{StaticResource Caption}" Text="文件名（留空按地址自动命名）" Margin="0,10,0,0" />
+                        <TextBox x:Name="OutputNameBox" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border x:Name="ProgressCard" Style="{StaticResource Card}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock x:Name="StateText" Style="{StaticResource SectionTitle}" Text="待开始" DockPanel.Dock="Left" />
+                            <TextBlock x:Name="DetailText" Style="{StaticResource Caption}" HorizontalAlignment="Right"
+                                       VerticalAlignment="Center" />
+                        </DockPanel>
+                        <ProgressBar x:Name="ProgressBar" Height="8" Margin="0,10,0,0" Minimum="0" Maximum="100" />
+                        <TextBlock x:Name="OutputPathText" Style="{StaticResource Caption}" Margin="0,8,0,0"
+                                   TextTrimming="CharacterEllipsis" />
+
+                        <Border x:Name="FailurePanel" Visibility="Collapsed" Margin="0,12,0,0"
+                                Background="#FDF3F3" BorderBrush="#F0C9C9" BorderThickness="1" CornerRadius="6" Padding="12">
+                            <StackPanel>
+                                <TextBlock x:Name="FailureText" Foreground="{StaticResource DangerBrush}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="FailureHint" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                                <Button x:Name="RetryTranscodeButton" Style="{StaticResource PrimaryButton}" Content="改用转码（H.264 / AAC）重试"
+                                        HorizontalAlignment="Left" Margin="0,10,0,0" Click="RetryTranscode_Click" Visibility="Collapsed" />
+                                <Button x:Name="ChooseOutputButton" Style="{StaticResource BaseButton}" Content="重新选择输出目录…"
+                                        HorizontalAlignment="Left" Margin="0,10,0,0" Click="ChooseOutput_Click" Visibility="Collapsed" />
+                            </StackPanel>
+                        </Border>
+
+                        <Expander Header="ffmpeg 命令" Margin="0,10,0,0">
+                            <TextBox x:Name="CommandText" IsReadOnly="True" TextWrapping="Wrap" FontFamily="Consolas"
+                                     Background="#F8F9FB" BorderThickness="0" Margin="0,6,0,0" />
+                        </Expander>
+                        <TextBlock Style="{StaticResource Caption}" Text="日志" Margin="0,10,0,0" />
+                        <TextBox x:Name="LogBox" IsReadOnly="True" Height="180" Margin="0,4,0,0"
+                                 VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                 FontFamily="Consolas" FontSize="11" TextWrapping="NoWrap" AcceptsReturn="True" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button x:Name="CancelButton" Style="{StaticResource DangerButton}" Content="取消转换"
+                    Click="Cancel_Click" Visibility="Collapsed" />
+            <Button x:Name="RevealButton" Style="{StaticResource BaseButton}" Content="在资源管理器中显示"
+                    Margin="8,0,0,0" Click="Reveal_Click" Visibility="Collapsed" />
+            <Button x:Name="CloseButton" Style="{StaticResource BaseButton}" Content="关闭" Margin="8,0,0,0" Click="Close_Click" />
+            <Button x:Name="StartTranscodeButton" Style="{StaticResource BaseButton}" Content="开始转码" Margin="8,0,0,0"
+                    Click="StartTranscode_Click" />
+            <Button x:Name="StartCopyButton" Style="{StaticResource PrimaryButton}" Content="开始转换（直接封装）"
+                    Margin="8,0,0,0" Click="StartCopy_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

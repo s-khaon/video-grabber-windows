@@ -103,6 +103,78 @@
                     </StackPanel>
                 </Border>
 
+                <!-- 浏览器 / 自动接管 / 广告拦截 -->
+                <Border Style="{StaticResource Card}" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock Text="浏览器与自动接管" Style="{StaticResource SectionTitle}" />
+                        <CheckBox Content="内置浏览器拦截广告（EasyList 离线规则）" Margin="0,10,0,0"
+                                  IsChecked="{Binding Settings.AdBlockEnabled, Mode=TwoWay}" Click="Option_Changed" />
+                        <CheckBox Content="下载失败时自动用后台浏览器接管，嗅探真实地址后重下" Margin="0,8,0,0"
+                                  IsChecked="{Binding Settings.AutoTakeoverEnabled, Mode=TwoWay}" Click="Option_Changed" />
+                        <CheckBox Content="接管成功后记住站点，以后直接走嗅探并跳过 yt-dlp" Margin="0,8,0,0"
+                                  IsChecked="{Binding Settings.RememberSniffSites, Mode=TwoWay}" Click="Option_Changed" />
+
+                        <TextBlock Text="广告拦截白名单（这些站点不拦截）" Style="{StaticResource Caption}" Margin="0,14,0,4" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding WhitelistInput, UpdateSourceTrigger=PropertyChanged}"
+                                     ToolTip="输入域名，例如 example.com" />
+                            <Button Grid.Column="1" Content="添加" Style="{StaticResource BaseButton}" Margin="8,0,0,0"
+                                    Command="{Binding AddWhitelistCommand}" />
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Whitelist}" Margin="0,6,0,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource BaseButton}" Margin="0,0,6,6" Padding="8,3"
+                                            Command="{Binding DataContext.RemoveWhitelistCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="点一下从白名单移除">
+                                        <TextBlock Text="{Binding}" FontSize="12" />
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="清空白名单" Style="{StaticResource BaseButton}" HorizontalAlignment="Left"
+                                Margin="0,2,0,0" Command="{Binding ClearWhitelistCommand}" />
+
+                        <TextBlock Text="已记住「直接嗅探」的站点" Style="{StaticResource Caption}" Margin="0,14,0,4" />
+                        <ItemsControl ItemsSource="{Binding SniffHosts}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource BaseButton}" Margin="0,0,6,6" Padding="8,3"
+                                            Command="{Binding DataContext.RemoveSniffHostCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="点一下取消该站点的嗅探策略">
+                                        <TextBlock Text="{Binding}" FontSize="12" />
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Button Content="清空站点记忆" Style="{StaticResource BaseButton}" HorizontalAlignment="Left"
+                                Command="{Binding ClearSniffHostsCommand}" />
+
+                        <TextBlock Text="浏览器数据" Style="{StaticResource Caption}" Margin="0,14,0,4" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Cookie 管理…" Style="{StaticResource BaseButton}" Click="OpenCookieManager_Click" />
+                            <Button Content="打开内置浏览器…" Style="{StaticResource BaseButton}" Margin="8,0,0,0"
+                                    Click="OpenBrowser_Click" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
                 <!-- 代理 -->
                 <Border Style="{StaticResource Card}" Margin="0,12,0,0">
                     <StackPanel>

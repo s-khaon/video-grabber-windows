@@ -8,7 +8,7 @@
   -->
   <Package Name="Video Grabber"
            Manufacturer="Video Grabber"
-           Version="0.1.1"
+           Version="0.2.0"
            UpgradeCode="BC8AAAD9-6175-42EC-BEAB-C3718285CA4D"
            Scope="perUser"
            Language="2052"

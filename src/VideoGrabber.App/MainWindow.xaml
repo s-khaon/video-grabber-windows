@@ -15,7 +15,11 @@
 
     <Window.InputBindings>
         <KeyBinding Key="N" Modifiers="Control" Command="{Binding AddDownloadCommand}" />
+        <KeyBinding Key="R" Modifiers="Control+Shift" Command="{Binding RepairLocalCommand}" />
         <KeyBinding Key="OemComma" Modifiers="Control" Command="{Binding SettingsCommand}" />
+        <KeyBinding Key="B" Modifiers="Control+Shift" Command="{Binding BrowserCommand}" />
+        <KeyBinding Key="M" Modifiers="Control+Shift" Command="{Binding ConverterCommand}" />
+        <KeyBinding Key="K" Modifiers="Control+Shift" Command="{Binding CookieManagerCommand}" />
     </Window.InputBindings>
 
     <Window.Resources>
@@ -43,6 +47,10 @@
                         <Button Content="取消" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
                                 IsEnabled="{Binding CanCancel}"
                                 Command="{Binding DataContext.CancelCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        <Button Content="提前结束并保存" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                                IsEnabled="{Binding CanFinishEarly}"
+                                ToolTip="停止下载，把已经下载的部分保存成可播放的视频；临时数据保留，之后仍可继续下载"
+                                Command="{Binding DataContext.FinishEarlyCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
                         <Button Content="打开所在文件夹" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
                                 Command="{Binding DataContext.RevealCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
                         <Button Content="删除任务" Style="{StaticResource DangerButton}"
@@ -75,6 +83,70 @@
                             <TextBlock Text="{Binding FailureHint}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
                                        Foreground="#8A3B3B"
                                        Visibility="{Binding FailureHint, Converter={StaticResource TextToVisibility}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 自动接管 -->
+                    <Border Style="{StaticResource Card}" Margin="0,12,0,0"
+                            Visibility="{Binding Takeover, Converter={StaticResource NullToVisibility}}">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Takeover.Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="14"
+                                           VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}" />
+                                <TextBlock Text="{Binding Takeover.Title}" Style="{StaticResource SectionTitle}" Margin="8,0,0,0" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding Takeover.SummaryText}" Style="{StaticResource Caption}" Margin="0,6,0,0"
+                                       TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Takeover.SelectedDetail}" FontSize="12" Margin="0,6,0,0"
+                                       Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap"
+                                       Visibility="{Binding Takeover.SelectedDetail, Converter={StaticResource TextToVisibility}}" />
+
+                            <Border Background="#FFF8E8" BorderBrush="#F0DFB8" BorderThickness="1" CornerRadius="6"
+                                    Padding="12" Margin="0,10,0,0"
+                                    Visibility="{Binding Takeover.HasPausedNote, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Takeover.PausedNote}" FontSize="12" TextWrapping="Wrap"
+                                               Foreground="#8A5A00" />
+                                    <Button Content="打开内置浏览器完成验证 / 登录" Style="{StaticResource PrimaryButton}"
+                                            HorizontalAlignment="Left" Margin="0,8,0,0"
+                                            Command="{Binding DataContext.OpenBrowserForJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}" />
+                                </StackPanel>
+                            </Border>
+
+                            <ItemsControl ItemsSource="{Binding Takeover.Steps}" Margin="0,8,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                            <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                                       Width="18" VerticalAlignment="Top" Margin="0,1,0,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsRunning}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsDone}" Value="True">
+                                                                <Setter Property="Foreground" Value="#3FA45B" />
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding IsFailed}" Value="True">
+                                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" MaxWidth="620" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Button Content="用内置浏览器手动嗅探…" Style="{StaticResource BaseButton}"
+                                    HorizontalAlignment="Left" Margin="0,10,0,0"
+                                    Command="{Binding DataContext.OpenBrowserForJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}" />
                         </StackPanel>
                     </Border>
 
@@ -165,6 +237,7 @@
               BorderThickness="0,0,0,1">
             <MenuItem Header="文件(_F)" Padding="8,4">
                 <MenuItem Header="新增下载…" Command="{Binding AddDownloadCommand}" InputGestureText="Ctrl+N" />
+                <MenuItem Header="修复本地视频文件…" Command="{Binding RepairLocalCommand}" InputGestureText="Ctrl+Shift+R" />
                 <MenuItem Header="设置…" Command="{Binding SettingsCommand}" InputGestureText="Ctrl+," />
                 <Separator />
                 <MenuItem Header="打开默认保存目录" Click="OpenFolder_Click" />
@@ -173,9 +246,15 @@
             </MenuItem>
             <MenuItem Header="队列(_Q)" Padding="8,4">
                 <MenuItem Header="全部取消" Command="{Binding CancelAllCommand}" />
+                <MenuItem Header="全部中止接管" Command="{Binding CancelAllTakeoversCommand}" />
                 <MenuItem Header="清理已完成" Command="{Binding ClearFinishedCommand}" />
                 <Separator />
                 <MenuItem Header="重新检测下载工具" Command="{Binding RefreshToolsCommand}" />
+            </MenuItem>
+            <MenuItem Header="工具(_T)" Padding="8,4">
+                <MenuItem Header="打开内置浏览器…" Command="{Binding BrowserCommand}" InputGestureText="Ctrl+Shift+B" />
+                <MenuItem Header="Cookie 管理…" Command="{Binding CookieManagerCommand}" InputGestureText="Ctrl+Shift+K" />
+                <MenuItem Header="m3u8 转 MP4…" Command="{Binding ConverterCommand}" InputGestureText="Ctrl+Shift+M" />
             </MenuItem>
             <MenuItem Header="帮助(_H)" Padding="8,4">
                 <MenuItem Header="什么是 yt-dlp / ffmpeg？" Click="About_Click" />
@@ -204,6 +283,17 @@
                         <Button Grid.Column="1" Content="新增下载" Style="{StaticResource PrimaryButton}"
                                 Command="{Binding AddDownloadCommand}" />
                     </Grid>
+
+                    <Border DockPanel.Dock="Bottom" Margin="16,0,16,0" Padding="10,8" CornerRadius="6"
+                            Background="#EAF2FE" BorderBrush="#BFD8FA" BorderThickness="1"
+                            Visibility="{Binding TakeoverBannerVisibility}">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="全部中止接管" Style="{StaticResource BaseButton}"
+                                    Margin="8,0,0,0" Command="{Binding CancelAllTakeoversCommand}" />
+                            <TextBlock Text="{Binding TakeoverSummary}" VerticalAlignment="Center"
+                                       FontSize="12" Foreground="#1559A6" TextWrapping="Wrap" />
+                        </DockPanel>
+                    </Border>
 
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="16,10,16,14">
                         <Button Content="全部取消" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
@@ -241,6 +331,10 @@
                 BorderThickness="0,1,0,0" Padding="16,8">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="站点登录 / 验证" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                            ToolTip="打开内置浏览器（Ctrl+Shift+B）" Command="{Binding BrowserCommand}" />
+                    <Button Content="转换" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                            ToolTip="m3u8 转 MP4（Ctrl+Shift+M）" Command="{Binding ConverterCommand}" />
                     <Button Content="重新检测" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
                             Command="{Binding RefreshToolsCommand}" />
                     <Button Content="设置" Style="{StaticResource BaseButton}" Command="{Binding SettingsCommand}" />

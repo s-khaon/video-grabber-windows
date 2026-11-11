@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using VideoGrabber.App.Views;
 using VideoGrabber.Core;
 using VideoGrabber.Core.Abstractions;
@@ -37,6 +38,75 @@ public sealed class SettingsViewModel : ObservableObject
         BrowseFfprobeCommand = new RelayCommand(() => PickExecutable(ToolEnvironment.Tool.Ffprobe));
         TestProxyCommand = new RelayCommand(() => _ = TestProxyAsync());
         RefreshToolsCommand = new RelayCommand(() => _ = RefreshToolsAsync());
+
+        Whitelist = new ObservableCollection<string>(settings.AdBlockWhitelist.OrderBy(item => item));
+        SniffHosts = new ObservableCollection<string>(settings.SniffOnlyHosts.OrderBy(item => item));
+        AddWhitelistCommand = new RelayCommand(AddWhitelist);
+        RemoveWhitelistCommand = new RelayCommand<string>(RemoveWhitelist);
+        ClearWhitelistCommand = new RelayCommand(ClearWhitelist);
+        RemoveSniffHostCommand = new RelayCommand<string>(RemoveSniffHost);
+        ClearSniffHostsCommand = new RelayCommand(ClearSniffHosts);
+    }
+
+    public ObservableCollection<string> Whitelist { get; }
+    public ObservableCollection<string> SniffHosts { get; }
+
+    private string _whitelistInput = "";
+    public string WhitelistInput
+    {
+        get => _whitelistInput;
+        set => SetProperty(ref _whitelistInput, value);
+    }
+
+    public RelayCommand AddWhitelistCommand { get; }
+    public RelayCommand<string> RemoveWhitelistCommand { get; }
+    public RelayCommand ClearWhitelistCommand { get; }
+    public RelayCommand<string> RemoveSniffHostCommand { get; }
+    public RelayCommand ClearSniffHostsCommand { get; }
+
+    private void AddWhitelist()
+    {
+        var value = WhitelistInput.Trim().ToLowerInvariant();
+        if (value.Length == 0) return;
+        if (value.StartsWith("http://", StringComparison.Ordinal) || value.StartsWith("https://", StringComparison.Ordinal))
+        {
+            value = Uri.TryCreate(value, UriKind.Absolute, out var uri) ? uri.Host : value;
+        }
+        if (Whitelist.Contains(value)) return;
+        Whitelist.Add(value);
+        Settings.AdBlockWhitelist = Whitelist.OrderBy(item => item).ToList();
+        Settings.Save();
+        WhitelistInput = "";
+    }
+
+    private void RemoveWhitelist(string? host)
+    {
+        if (string.IsNullOrEmpty(host)) return;
+        Whitelist.Remove(host);
+        Settings.AdBlockWhitelist = Whitelist.ToList();
+        Settings.Save();
+    }
+
+    private void ClearWhitelist()
+    {
+        Whitelist.Clear();
+        Settings.AdBlockWhitelist.Clear();
+        Settings.Save();
+    }
+
+    private void RemoveSniffHost(string? host)
+    {
+        if (string.IsNullOrEmpty(host)) return;
+        SniffHosts.Remove(host);
+        Settings.SniffOnlyHosts = SniffHosts.ToList();
+        Settings.Save();
+    }
+
+    private void ClearSniffHosts()
+    {
+        SniffHosts.Clear();
+        Settings.SniffOnlyHosts.Clear();
+        Settings.Save();
     }
 
     public AppSettings Settings { get; }

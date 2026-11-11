@@ -14,10 +14,11 @@ public partial class AddDownloadWindow : Window
         DownloadManager downloads,
         AppSettings settings,
         IFilePicker filePicker,
-        IClipboardService clipboard)
+        IClipboardService clipboard,
+        CookieStore? cookies = null)
     {
         InitializeComponent();
-        _viewModel = new AddDownloadViewModel(downloads, settings, filePicker, clipboard);
+        _viewModel = new AddDownloadViewModel(downloads, settings, filePicker, clipboard, cookies);
         _viewModel.CloseRequested += () => DialogResult = true;
         DataContext = _viewModel;
         Loaded += (_, _) => Keyboard.Focus(this);

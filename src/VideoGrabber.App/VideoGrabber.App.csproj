@@ -10,6 +10,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>VideoGrabber</AssemblyName>
     <RootNamespace>VideoGrabber.App</RootNamespace>
+    <Version>0.2.0</Version>
     <!-- exe 文件图标（资源管理器 / 任务栏 / 快捷方式）。 -->
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
@@ -27,7 +28,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- 广告拦截规则：与 macOS 版同一份离线产物，运行时零网络请求。 -->
+    <Content Include="Assets\AdBlock\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\VideoGrabber.Core\VideoGrabber.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
   </ItemGroup>
 
 </Project>

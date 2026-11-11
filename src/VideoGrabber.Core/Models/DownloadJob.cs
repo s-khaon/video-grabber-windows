@@ -23,6 +23,7 @@ public sealed class DownloadJob : ObservableObject
     private bool _finishEarlyRequested;
     private string? _outputBase;
     private string? _directOutputPath;
+    private TakeoverProgress? _takeover;
 
     public DownloadJob(
         string urlString,
@@ -210,6 +211,9 @@ public sealed class DownloadJob : ObservableObject
     /// <summary>是否走「按分片下载」的 HLS 通道（可断点续传）。</summary>
     public bool IsSegmentedHls { get; set; }
 
+    /// <summary>HLS 分片通道的续传元数据（播放列表、分片清单、目标路径）。</summary>
+    public HlsResumeState? HlsResume { get; set; }
+
     /// <summary>yt-dlp 失败后的自动重试次数（最多 3 次）。</summary>
     public int AutoRetryCount { get; set; }
 
@@ -233,6 +237,24 @@ public sealed class DownloadJob : ObservableObject
 
     /// <summary>接管后用 yt-dlp 重下失败，是否已经自动回退到 ffmpeg。</summary>
     public bool DidFallbackToFfmpeg { get; set; }
+
+    /// <summary>本任务是否已由自动接管重试过；接管失败不再重复触发。</summary>
+    public bool DidAutoTakeover { get; set; }
+
+    /// <summary>自动接管进度与步骤时间线；未接管时为 null。</summary>
+    public TakeoverProgress? Takeover
+    {
+        get => _takeover;
+        set
+        {
+            if (!SetProperty(ref _takeover, value)) return;
+            OnPropertyChanged(nameof(HasTakeover));
+            OnPropertyChanged(nameof(TakeoverIsActive));
+        }
+    }
+
+    public bool HasTakeover => _takeover != null;
+    public bool TakeoverIsActive => _takeover?.IsActive == true;
 
     /// <summary>ffmpeg 直连的目标文件，结束后据此报告产物。</summary>
     public string? DirectOutputPath

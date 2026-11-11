@@ -9,14 +9,17 @@ public sealed class TrayIcon : IDisposable
 {
     private readonly Forms.NotifyIcon _notifyIcon;
 
-    public TrayIcon(Action showWindow, Action exit)
+    public TrayIcon(Action showWindow, Action cancelAll, Action exit)
     {
         var menu = new Forms.ContextMenuStrip();
         var showItem = new Forms.ToolStripMenuItem("显示主窗口");
         showItem.Click += (_, _) => showWindow();
+        var cancelItem = new Forms.ToolStripMenuItem("全部取消下载");
+        cancelItem.Click += (_, _) => cancelAll();
         var exitItem = new Forms.ToolStripMenuItem("退出");
         exitItem.Click += (_, _) => exit();
         menu.Items.Add(showItem);
+        menu.Items.Add(cancelItem);
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(exitItem);
 

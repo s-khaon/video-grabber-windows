@@ -104,6 +104,10 @@ public sealed class PersistedJob
     public PersistedFailure? Failure { get; set; }
     public DateTime CreatedAt { get; set; }
     public bool IsSegmentedHLS { get; set; }
+    public HlsResumeState? HlsResume { get; set; }
+    public string? DirectOutputPath { get; set; }
+    /// <summary>直播判定（true / false / 未判定），重启后继续按直播录制。</summary>
+    public bool? IsLiveHLS { get; set; }
     public int AutoRetryCount { get; set; }
     public string? OutputBase { get; set; }
 }
@@ -136,6 +140,52 @@ public sealed class TaskMetadataStore
 
     /// <summary>yt-dlp 的 .part 专门放在任务目录下的 `ytdlp`，重启后能准确找回。</summary>
     public string YtDlpTempDirectory(Guid id) => Path.Combine(TaskDirectory(id), "ytdlp");
+
+    /// <summary>HLS 分片通道的临时目录（播放列表、已下载分片、密钥）。</summary>
+    public string HlsTempDirectory(Guid id) => Path.Combine(TaskDirectory(id), "hls");
+
+    /// <summary>已完成的分片序号写在 completed.json，避免频繁重写整份续传元数据。</summary>
+    public void SaveCompleted(Guid id, IEnumerable<int> indices)
+    {
+        var directory = TaskDirectory(id);
+        lock (_gate)
+        {
+            try
+            {
+                Directory.CreateDirectory(directory);
+                var path = Path.Combine(directory, "completed.json");
+                var temp = path + ".tmp";
+                var payload = JsonSerializer.Serialize(new { completed = indices.OrderBy(index => index).ToList() }, JsonOptions);
+                File.WriteAllText(temp, payload);
+                File.Move(temp, path, overwrite: true);
+            }
+            catch (Exception)
+            {
+                // 写失败时下次继续会重下这几片，不影响正确性。
+            }
+        }
+    }
+
+    public HashSet<int> LoadCompleted(Guid id)
+    {
+        var path = Path.Combine(TaskDirectory(id), "completed.json");
+        if (!File.Exists(path)) return new HashSet<int>();
+        try
+        {
+            using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
+            if (!document.RootElement.TryGetProperty("completed", out var array)) return new HashSet<int>();
+            var result = new HashSet<int>();
+            foreach (var item in array.EnumerateArray())
+            {
+                if (item.TryGetInt32(out var index)) result.Add(index);
+            }
+            return result;
+        }
+        catch (Exception)
+        {
+            return new HashSet<int>();
+        }
+    }
 
     public void Save(PersistedJob job)
     {

@@ -226,4 +226,22 @@ public static class FileNameRules
         }
         return candidate;
     }
+
+    /// <summary>文件已存在时追加 ` (2)`、` (3)`…，绝不覆盖用户已有文件。</summary>
+    public static string UniquePath(string path)
+    {
+        if (!File.Exists(path)) return path;
+        var directory = Path.GetDirectoryName(path) ?? "";
+        var baseName = Path.GetFileNameWithoutExtension(path);
+        var extension = Path.GetExtension(path);
+        var candidate = path;
+        var index = 2;
+        while (File.Exists(candidate))
+        {
+            candidate = Path.Combine(directory, $"{baseName} ({index}){extension}");
+            index++;
+            if (index > 999) break;
+        }
+        return candidate;
+    }
 }

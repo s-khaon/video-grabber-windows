@@ -63,6 +63,11 @@
                 </Grid>
                 <TextBlock Text="{Binding ContainerHint}" Style="{StaticResource Caption}" Margin="0,8,0,0" TextWrapping="Wrap" />
 
+                <StackPanel Margin="0,16,0,0">
+                    <CheckBox Content="复用内置浏览器保存的 Cookies" IsChecked="{Binding UseCookies, Mode=TwoWay}" />
+                    <TextBlock Text="{Binding CookieHint}" Style="{StaticResource Caption}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+
                 <TextBlock Text="保存目录" Style="{StaticResource SectionTitle}" Margin="0,16,0,0" />
                 <Grid Margin="0,8,0,0">
                     <Grid.ColumnDefinitions>

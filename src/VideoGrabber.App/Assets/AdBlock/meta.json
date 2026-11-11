@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-07T04:52:11Z",
+  "sources": [
+    "EasyList",
+    "EasyList China"
+  ],
+  "stats": {
+    "network": 62724,
+    "cosmetic": 1500,
+    "domainSites": 8438,
+    "skipped": 7250,
+    "exceptions": 22
+  }
+}

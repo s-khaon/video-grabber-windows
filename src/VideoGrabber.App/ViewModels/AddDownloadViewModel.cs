@@ -15,6 +15,7 @@ public sealed class AddDownloadViewModel : ObservableObject
 
     private readonly DownloadManager _downloads;
     private readonly AppSettings _settings;
+    private readonly CookieStore? _cookies;
     private readonly IFilePicker _filePicker;
     private readonly IClipboardService _clipboard;
 
@@ -28,17 +29,21 @@ public sealed class AddDownloadViewModel : ObservableObject
     private string _probeTitle = "";
     private string _probeMeta = "";
     private string? _thumbnailUrl;
+    private bool _useCookies;
 
     public AddDownloadViewModel(
         DownloadManager downloads,
         AppSettings settings,
         IFilePicker filePicker,
-        IClipboardService clipboard)
+        IClipboardService clipboard,
+        CookieStore? cookies = null)
     {
         _downloads = downloads;
         _settings = settings;
+        _cookies = cookies;
         _filePicker = filePicker;
         _clipboard = clipboard;
+        _useCookies = settings.UseCookiesByDefault;
 
         SaveDirectory = string.IsNullOrWhiteSpace(settings.DefaultSaveDirectory)
             ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
@@ -62,7 +67,43 @@ public sealed class AddDownloadViewModel : ObservableObject
     public string Links
     {
         get => _links;
-        set => SetProperty(ref _links, value);
+        set
+        {
+            if (!SetProperty(ref _links, value)) return;
+            OnPropertyChanged(nameof(CookieHint));
+        }
+    }
+
+    /// <summary>是否复用内置浏览器导出的 cookie。</summary>
+    public bool UseCookies
+    {
+        get => _useCookies;
+        set
+        {
+            if (!SetProperty(ref _useCookies, value)) return;
+            OnPropertyChanged(nameof(CookieHint));
+        }
+    }
+
+    /// <summary>命中 / 缺失 cookie 的提示，与 macOS 版新增下载窗口一致。</summary>
+    public string CookieHint
+    {
+        get
+        {
+            var first = FirstLink();
+            if (first == null) return "粘贴链接后会显示命中的 Cookies 文件。";
+            if (_cookies == null || !Uri.TryCreate(first, UriKind.Absolute, out var uri))
+            {
+                return "链接无效，无法匹配 Cookies。";
+            }
+            _cookies.Reload();
+            var entry = _cookies.EntryFor(uri);
+            if (entry == null)
+            {
+                return "没有找到该站点的 Cookies。遇到登录 / 验证时，可在「工具 → 打开内置浏览器」里完成验证并保存 Cookies。";
+            }
+            return $"命中 {entry.Host}.txt · {entry.CookieCount} 条 · 更新于 {entry.ModifiedAt:MM-dd HH:mm}";
+        }
     }
 
     public ObservableCollection<QualityChoice> QualityOptions { get; }
@@ -201,7 +242,7 @@ public sealed class AddDownloadViewModel : ObservableObject
             StatusMessage = ex.Message;
             if (ex.NeedsVerification)
             {
-                StatusMessage += "\n该站点需要登录或人机验证：完整版可打开内置浏览器完成验证并保存 Cookies（P3 阶段）。";
+                StatusMessage += "\n该站点需要登录或人机验证：可在「工具 → 打开内置浏览器」完成验证并保存 Cookies。";
             }
         }
         catch (Exception ex)
@@ -245,7 +286,7 @@ public sealed class AddDownloadViewModel : ObservableObject
                 SelectedQuality,
                 SelectedContainer.Value,
                 directory,
-                _settings.UseCookiesByDefault,
+                UseCookies,
                 batchID: batch);
             if (job != null) added++;
         }

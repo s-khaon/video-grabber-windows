@@ -22,6 +22,14 @@ public partial class SettingsWindow : Window
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
 
+    private void Option_Changed(object sender, RoutedEventArgs e) => _viewModel.Save();
+
+    private void OpenCookieManager_Click(object sender, RoutedEventArgs e) =>
+        ((App)Application.Current).ShowCookieManager();
+
+    private void OpenBrowser_Click(object sender, RoutedEventArgs e) =>
+        ((App)Application.Current).ShowBrowser();
+
     protected override void OnClosed(EventArgs e)
     {
         _viewModel.Save();
