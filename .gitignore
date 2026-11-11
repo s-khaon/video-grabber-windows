@@ -1,0 +1,70 @@
+# ---- .NET / WPF 构建产物 ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ll]og/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# ---- IDE ----
+.vs/
+.idea/
+.vscode/
+*.swp
+*~
+
+# ---- 测试 / 打包 ----
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.coveragexml
+*.nupkg
+*.snupkg
+*.nuspec.user
+publish/
+artifacts/
+
+# ---- 本地工具二进制（yt-dlp / ffmpeg / ffprobe 等，勿入库）----
+tools/
+**/Tools/
+yt-dlp*.exe
+ffmpeg*.exe
+ffprobe*.exe
+ffplay*.exe
+
+# ---- 运行期本地状态 / 日志 ----
+*.log
+*.tmp
+logs/
+.videograbber/
+downloads/
+Download/
+settings.json
+task.json
+
+# ---- 下载产物与临时文件 ----
+*.part
+*.ytdl
+*.download
+*.mp4
+*.mkv
+*.webm
+*.flv
+*.mov
+*.avi
+*.ts
+*.m4a
+*.mp3
+*.cookies.txt
+cookies.txt
+
+# ---- 系统 ----
+Thumbs.db
+Desktop.ini
+.DS_Store

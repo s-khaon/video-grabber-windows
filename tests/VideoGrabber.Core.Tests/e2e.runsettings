@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <VIDEOGRABBER_E2E>1</VIDEOGRABBER_E2E>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

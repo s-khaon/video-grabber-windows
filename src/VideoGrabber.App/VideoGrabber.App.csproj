@@ -1,0 +1,25 @@
+﻿﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- 托盘图标用 System.Windows.Forms.NotifyIcon，避免引入第三方 UI 包。 -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>VideoGrabber</AssemblyName>
+    <RootNamespace>VideoGrabber.App</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WinForms 的 global using 会和 WPF 的 Application / MessageBox 冲突，这里移除。 -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VideoGrabber.Core\VideoGrabber.Core.csproj" />
+  </ItemGroup>
+
+</Project>
