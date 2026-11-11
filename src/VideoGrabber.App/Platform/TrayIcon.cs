@@ -22,12 +22,24 @@ public sealed class TrayIcon : IDisposable
 
         _notifyIcon = new Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = LoadTrayIcon(),
             Text = "Video Grabber",
             Visible = true,
             ContextMenuStrip = menu
         };
         _notifyIcon.DoubleClick += (_, _) => showWindow();
+    }
+
+    /// <summary>
+    /// 托盘用单独的 16/20/24/32 多尺寸图标，让系统按 DPI 选择，而不是缩放 256 大图。
+    /// </summary>
+    private static System.Drawing.Icon LoadTrayIcon()
+    {
+        var resource = System.Windows.Application.GetResourceStream(
+            new Uri("pack://application:,,,/Assets/tray.ico"));
+        if (resource == null) return System.Drawing.SystemIcons.Application;
+        using var stream = resource.Stream;
+        return new System.Drawing.Icon(stream);
     }
 
     public void Notify(string title, string message)

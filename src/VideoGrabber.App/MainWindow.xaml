@@ -6,6 +6,7 @@
         xmlns:models="clr-namespace:VideoGrabber.Core.Models;assembly=VideoGrabber.Core"
         mc:Ignorable="d"
         Title="Video Grabber"
+        Icon="Assets/app.ico"
         Height="760" Width="1120" MinHeight="560" MinWidth="920"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource CanvasBrush}"
