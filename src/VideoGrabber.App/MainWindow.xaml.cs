@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using VideoGrabber.App.Platform;
 using VideoGrabber.App.ViewModels;
 
 namespace VideoGrabber.App;
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
     }
 
     private MainViewModel? ViewModel => DataContext as MainViewModel;

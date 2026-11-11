@@ -52,6 +52,7 @@ public partial class BrowserWindow : Window
         AdBlockEngine? adblock)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         _sniffer = sniffer;
         _cookies = cookies;
         _settings = settings;
@@ -163,6 +164,7 @@ public partial class BrowserWindow : Window
         if (_core == null) return;
         _sniffer.NotePage(e.Uri);
         _cosmeticAppliedThisPage = false;
+        PageProgress.Visibility = Visibility.Visible;
         UpdateNavigationButtons();
     }
 
@@ -176,8 +178,10 @@ public partial class BrowserWindow : Window
     private async void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
     {
         if (_core == null) return;
+        PageProgress.Visibility = Visibility.Collapsed;
         _viewModel.Address = _core.Source;
         UpdateNavigationButtons();
+        ShieldButton.IsChecked = AdBlockActiveForCurrentPage();
 
         if (!e.IsSuccess)
         {
@@ -496,7 +500,8 @@ public partial class BrowserWindow : Window
     private void UpdateShieldText()
     {
         var total = _networkBlocked + _popupBlocked + _cosmeticApplied;
-        _viewModel.ShieldText = $"🛡 拦截 {total}";
+        _viewModel.ShieldText = $"拦截 {total}";
+        _viewModel.ShieldCountText = total.ToString();
         _viewModel.StatusText = total > 0
             ? $"本次会话已拦截 {total} 项（请求 {_networkBlocked} · 弹窗 {_popupBlocked} · 外观 {_cosmeticApplied}）"
             : _viewModel.StatusText;
@@ -526,6 +531,14 @@ public partial class BrowserWindow : Window
         }
         _settings.Save();
         _core?.Reload();
+    }
+
+    private void ToggleSniffer_Click(object sender, RoutedEventArgs e)
+    {
+        var collapsed = SnifferColumn.Width.Value < 1;
+        SnifferColumn.Width = collapsed ? new GridLength(392) : new GridLength(0);
+        SnifferPanel.Visibility = collapsed ? Visibility.Visible : Visibility.Collapsed;
+        SnifferToolbarButton.Visibility = collapsed ? Visibility.Collapsed : Visibility.Visible;
     }
 
     // MARK: - 列表行操作

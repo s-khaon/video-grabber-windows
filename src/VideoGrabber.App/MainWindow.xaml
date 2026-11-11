@@ -7,10 +7,13 @@
         mc:Ignorable="d"
         Title="Video Grabber"
         Icon="Assets/app.ico"
-        Height="760" Width="1120" MinHeight="560" MinWidth="920"
+        Height="780" Width="1180" MinHeight="580" MinWidth="960"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource CanvasBrush}"
+        Background="{DynamicResource CanvasBrush}"
         FontFamily="{StaticResource AppFont}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontSize="13"
+        UseLayoutRounding="True"
         TextOptions.TextFormattingMode="Display">
 
     <Window.InputBindings>
@@ -23,65 +26,72 @@
     </Window.InputBindings>
 
     <Window.Resources>
-        <!-- 任务详情：完整信息 + 日志 -->
+        <!-- 任务详情 -->
         <DataTemplate DataType="{x:Type models:DownloadJob}">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20,24,24">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,22,28,28">
                 <StackPanel>
-                    <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource PageTitle}" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding UrlString}" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,6,0,0" />
 
                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                        <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10" Padding="9,3" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding StatusText}" FontSize="12" Foreground="{StaticResource AccentBrush}" />
+                        <Border Style="{StaticResource StatusPill}" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding StatusText}" FontSize="12"
+                                       Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold" />
                         </Border>
-                        <TextBlock Text="{Binding BytesText}" Style="{StaticResource Caption}" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding BytesText}" Style="{StaticResource Caption}" Margin="10,0,0,0"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
 
-                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                        <Button Content="继续下载" Style="{StaticResource PrimaryButton}" Margin="0,0,8,0"
+                    <WrapPanel Margin="0,16,0,0">
+                        <Button Content="继续下载" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"
                                 IsEnabled="{Binding CanResume}"
                                 Command="{Binding DataContext.ResumeCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        <Button Content="重试" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                        <Button Content="重试" Style="{StaticResource BaseButton}" Margin="0,0,8,8"
                                 IsEnabled="{Binding CanRetry}"
                                 Command="{Binding DataContext.RetryCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        <Button Content="取消" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                        <Button Content="取消" Style="{StaticResource BaseButton}" Margin="0,0,8,8"
                                 IsEnabled="{Binding CanCancel}"
                                 Command="{Binding DataContext.CancelCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        <Button Content="提前结束并保存" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                        <Button Content="提前结束并保存" Style="{StaticResource BaseButton}" Margin="0,0,8,8"
                                 IsEnabled="{Binding CanFinishEarly}"
                                 ToolTip="停止下载，把已经下载的部分保存成可播放的视频；临时数据保留，之后仍可继续下载"
                                 Command="{Binding DataContext.FinishEarlyCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        <Button Content="打开所在文件夹" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                        <Button Content="打开所在文件夹" Style="{StaticResource BaseButton}" Margin="0,0,8,8"
                                 Command="{Binding DataContext.RevealCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        <Button Content="删除任务" Style="{StaticResource DangerButton}"
+                        <Button Content="删除任务" Style="{StaticResource DangerButton}" Margin="0,0,0,8"
                                 Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-                    </StackPanel>
+                    </WrapPanel>
 
                     <!-- 进度 -->
-                    <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <Border Style="{StaticResource Card}" Margin="0,8,0,0">
                         <StackPanel>
                             <DockPanel>
-                                <TextBlock DockPanel.Dock="Right" Text="{Binding BytesText}" Style="{StaticResource Caption}" VerticalAlignment="Bottom" />
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding BytesText}" Style="{StaticResource Caption}"
+                                           VerticalAlignment="Bottom" />
                                 <TextBlock Text="{Binding ProgressDetailText}" Style="{StaticResource SectionTitle}" />
                             </DockPanel>
                             <ProgressBar Height="6" Margin="0,10,0,0" Maximum="1" Minimum="0"
-                                         Value="{Binding Progress, Mode=OneWay}"
-                                         Foreground="{StaticResource AccentBrush}" Background="#EDEFF2"
-                                         BorderThickness="0" />
+                                         Value="{Binding Progress, Mode=OneWay}" />
                             <TextBlock Text="{Binding CommandPreview}" Style="{StaticResource Caption}"
-                                       TextWrapping="Wrap" Margin="0,10,0,0" FontFamily="Consolas"
+                                       TextWrapping="Wrap" Margin="0,10,0,0" FontFamily="{StaticResource MonoFont}"
                                        Visibility="{Binding CommandPreview, Converter={StaticResource TextToVisibility}}" />
                         </StackPanel>
                     </Border>
 
                     <!-- 失败原因 -->
-                    <Border Style="{StaticResource Card}" Margin="0,12,0,0" Background="#FDF3F3" BorderBrush="#F2C9C9"
+                    <Border Style="{StaticResource Card}" Margin="0,12,0,0"
+                            Background="{DynamicResource DangerSoftBrush}"
+                            BorderBrush="{DynamicResource DangerBrush}"
                             Visibility="{Binding HasFailure, Converter={StaticResource BoolToVisibility}}">
                         <StackPanel>
-                            <TextBlock Text="{Binding FailureMessage}" FontWeight="SemiBold" TextWrapping="Wrap"
-                                       Foreground="{StaticResource DangerBrush}" />
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE783;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                           Foreground="{DynamicResource DangerBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding FailureMessage}" FontWeight="SemiBold" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource DangerBrush}" Margin="8,0,0,0" />
+                            </StackPanel>
                             <TextBlock Text="{Binding FailureHint}" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0"
-                                       Foreground="#8A3B3B"
+                                       Foreground="{DynamicResource DangerBrush}" Opacity="0.85"
                                        Visibility="{Binding FailureHint, Converter={StaticResource TextToVisibility}}" />
                         </StackPanel>
                     </Border>
@@ -91,47 +101,51 @@
                             Visibility="{Binding Takeover, Converter={StaticResource NullToVisibility}}">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding Takeover.Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                                           VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}" />
-                                <TextBlock Text="{Binding Takeover.Title}" Style="{StaticResource SectionTitle}" Margin="8,0,0,0" />
+                                <Border Width="28" Height="28" CornerRadius="8" Background="{DynamicResource AccentSoftBrush}">
+                                    <TextBlock Text="{Binding Takeover.Glyph}" FontFamily="{StaticResource IconFont}"
+                                               FontSize="13" Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="{Binding Takeover.Title}" Style="{StaticResource SectionTitle}"
+                                           Margin="10,0,0,0" VerticalAlignment="Center" />
                             </StackPanel>
-                            <TextBlock Text="{Binding Takeover.SummaryText}" Style="{StaticResource Caption}" Margin="0,6,0,0"
+                            <TextBlock Text="{Binding Takeover.SummaryText}" Style="{StaticResource Caption}" Margin="0,8,0,0"
                                        TextWrapping="Wrap" />
                             <TextBlock Text="{Binding Takeover.SelectedDetail}" FontSize="12" Margin="0,6,0,0"
-                                       Foreground="{StaticResource AccentBrush}" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap"
                                        Visibility="{Binding Takeover.SelectedDetail, Converter={StaticResource TextToVisibility}}" />
 
-                            <Border Background="#FFF8E8" BorderBrush="#F0DFB8" BorderThickness="1" CornerRadius="6"
+                            <Border Background="{DynamicResource WarningSoftBrush}" CornerRadius="6"
                                     Padding="12" Margin="0,10,0,0"
                                     Visibility="{Binding Takeover.HasPausedNote, Converter={StaticResource BoolToVisibility}}">
                                 <StackPanel>
                                     <TextBlock Text="{Binding Takeover.PausedNote}" FontSize="12" TextWrapping="Wrap"
-                                               Foreground="#8A5A00" />
+                                               Foreground="{DynamicResource WarningBrush}" />
                                     <Button Content="打开内置浏览器完成验证 / 登录" Style="{StaticResource PrimaryButton}"
-                                            HorizontalAlignment="Left" Margin="0,8,0,0"
+                                            HorizontalAlignment="Left" Margin="0,9,0,0"
                                             Command="{Binding DataContext.OpenBrowserForJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                             CommandParameter="{Binding}" />
                                 </StackPanel>
                             </Border>
 
-                            <ItemsControl ItemsSource="{Binding Takeover.Steps}" Margin="0,8,0,0">
+                            <ItemsControl ItemsSource="{Binding Takeover.Steps}" Margin="0,10,0,0">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                                            <TextBlock Text="{Binding Glyph}" FontFamily="Segoe MDL2 Assets" FontSize="11"
+                                            <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="11"
                                                        Width="18" VerticalAlignment="Top" Margin="0,1,0,0">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+                                                        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsRunning}" Value="True">
-                                                                <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsDone}" Value="True">
-                                                                <Setter Property="Foreground" Value="#3FA45B" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}" />
                                                             </DataTrigger>
                                                             <DataTrigger Binding="{Binding IsFailed}" Value="True">
-                                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                                <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -144,7 +158,7 @@
                             </ItemsControl>
 
                             <Button Content="用内置浏览器手动嗅探…" Style="{StaticResource BaseButton}"
-                                    HorizontalAlignment="Left" Margin="0,10,0,0"
+                                    HorizontalAlignment="Left" Margin="0,12,0,0"
                                     Command="{Binding DataContext.OpenBrowserForJobCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                     CommandParameter="{Binding}" />
                         </StackPanel>
@@ -152,74 +166,80 @@
 
                     <!-- 任务信息 -->
                     <Border Style="{StaticResource Card}" Margin="0,12,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="90" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="任务信息" Style="{StaticResource SectionTitle}" Margin="0,0,0,12" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="86" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="引擎" Style="{StaticResource Caption}" Margin="0,0,0,8" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding EngineText}" FontSize="13" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="引擎" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding EngineText}" FontSize="13" Margin="0,0,0,9" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="清晰度" Style="{StaticResource Caption}" Margin="0,0,0,8" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Quality.Label}" FontSize="13" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="清晰度" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Quality.Label}" FontSize="13" Margin="0,0,0,9" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="容器" Style="{StaticResource Caption}" Margin="0,0,0,8" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ContainerText}" FontSize="13" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="容器" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ContainerText}" FontSize="13" Margin="0,0,0,9" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="保存目录" Style="{StaticResource Caption}" Margin="0,0,0,8" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SaveDirectory}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="保存目录" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding SaveDirectory}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,9" />
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="代理" Style="{StaticResource Caption}" Margin="0,0,0,8" />
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProxyDescription}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,8" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="代理" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProxyDescription}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,9" />
 
-                            <TextBlock Grid.Row="5" Grid.Column="0" Text="产物" Style="{StaticResource Caption}" />
-                            <ItemsControl Grid.Row="5" Grid.Column="1" ItemsSource="{Binding OutputFiles}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource PrimaryTextBrush}" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </Grid>
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="产物" Style="{StaticResource Caption}" />
+                                <ItemsControl Grid.Row="5" Grid.Column="1" ItemsSource="{Binding OutputFiles}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                        </StackPanel>
                     </Border>
 
                     <!-- 日志 -->
                     <Border Style="{StaticResource Card}" Margin="0,12,0,0">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="日志" Style="{StaticResource SectionTitle}" Margin="0,0,0,8" />
-                            <TextBox Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" Height="260"
-                                     FontFamily="Consolas" FontSize="11.5" TextWrapping="NoWrap"
-                                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                                     Background="#FAFBFC" BorderThickness="0"
-                                     TextChanged="LogBox_TextChanged" />
+                            <TextBlock DockPanel.Dock="Top" Text="日志" Style="{StaticResource SectionTitle}" Margin="0,0,0,10" />
+                            <Border Background="{DynamicResource LogBackgroundBrush}" CornerRadius="6" Padding="10">
+                                <TextBox Text="{Binding LogText, Mode=OneWay}" IsReadOnly="True" Height="250"
+                                         FontFamily="{StaticResource MonoFont}" FontSize="11.5" TextWrapping="NoWrap"
+                                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                                         Background="Transparent" BorderThickness="0" Padding="0"
+                                         TextChanged="LogBox_TextChanged" />
+                            </Border>
                         </DockPanel>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
         </DataTemplate>
 
-        <!-- 侧栏条目 -->
+        <!-- 侧栏任务行 -->
         <DataTemplate x:Key="JobItemTemplate" DataType="{x:Type models:DownloadJob}">
             <StackPanel>
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Right" Text="{Binding PercentText}" Style="{StaticResource Caption}"
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding PercentText}" FontSize="12"
+                               Foreground="{DynamicResource AccentBrush}" FontWeight="SemiBold"
                                Margin="8,0,0,0" VerticalAlignment="Center"
                                Visibility="{Binding IsActive, Converter={StaticResource BoolToVisibility}}" />
-                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
                 </DockPanel>
-                <ProgressBar Height="3" Margin="0,7,0,0" Maximum="1" Minimum="0"
-                             Value="{Binding Progress, Mode=OneWay}"
-                             Foreground="{StaticResource AccentBrush}" Background="#EDEFF2" BorderThickness="0" />
-                <TextBlock Text="{Binding ProgressDetailText}" Style="{StaticResource Caption}" Margin="0,5,0,0"
+                <ProgressBar Height="3" Margin="0,8,0,0" Maximum="1" Minimum="0"
+                             Value="{Binding Progress, Mode=OneWay}" />
+                <TextBlock Text="{Binding ProgressDetailText}" Style="{StaticResource Caption}" Margin="0,6,0,0"
                            TextTrimming="CharacterEllipsis" />
             </StackPanel>
         </DataTemplate>
@@ -232,83 +252,125 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- 菜单 -->
-        <Menu Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="6,2" BorderBrush="{StaticResource LineBrush}"
-              BorderThickness="0,0,0,1">
-            <MenuItem Header="文件(_F)" Padding="8,4">
-                <MenuItem Header="新增下载…" Command="{Binding AddDownloadCommand}" InputGestureText="Ctrl+N" />
-                <MenuItem Header="修复本地视频文件…" Command="{Binding RepairLocalCommand}" InputGestureText="Ctrl+Shift+R" />
-                <MenuItem Header="设置…" Command="{Binding SettingsCommand}" InputGestureText="Ctrl+," />
-                <Separator />
-                <MenuItem Header="打开默认保存目录" Click="OpenFolder_Click" />
-                <Separator />
-                <MenuItem Header="退出" Click="Exit_Click" InputGestureText="Alt+F4" />
-            </MenuItem>
-            <MenuItem Header="队列(_Q)" Padding="8,4">
-                <MenuItem Header="全部取消" Command="{Binding CancelAllCommand}" />
-                <MenuItem Header="全部中止接管" Command="{Binding CancelAllTakeoversCommand}" />
-                <MenuItem Header="清理已完成" Command="{Binding ClearFinishedCommand}" />
-                <Separator />
-                <MenuItem Header="重新检测下载工具" Command="{Binding RefreshToolsCommand}" />
-            </MenuItem>
-            <MenuItem Header="工具(_T)" Padding="8,4">
-                <MenuItem Header="打开内置浏览器…" Command="{Binding BrowserCommand}" InputGestureText="Ctrl+Shift+B" />
-                <MenuItem Header="Cookie 管理…" Command="{Binding CookieManagerCommand}" InputGestureText="Ctrl+Shift+K" />
-                <MenuItem Header="m3u8 转 MP4…" Command="{Binding ConverterCommand}" InputGestureText="Ctrl+Shift+M" />
-            </MenuItem>
-            <MenuItem Header="帮助(_H)" Padding="8,4">
-                <MenuItem Header="什么是 yt-dlp / ffmpeg？" Click="About_Click" />
-            </MenuItem>
-        </Menu>
+        <!-- 顶栏：菜单 + 快捷操作 -->
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,0,1" Padding="10,4,12,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Menu VerticalAlignment="Center">
+                    <MenuItem Header="文件(_F)">
+                        <MenuItem Header="新增下载…" Command="{Binding AddDownloadCommand}" InputGestureText="Ctrl+N" />
+                        <MenuItem Header="修复本地视频文件…" Command="{Binding RepairLocalCommand}" InputGestureText="Ctrl+Shift+R" />
+                        <MenuItem Header="设置…" Command="{Binding SettingsCommand}" InputGestureText="Ctrl+," />
+                        <Separator />
+                        <MenuItem Header="打开默认保存目录" Click="OpenFolder_Click" />
+                        <Separator />
+                        <MenuItem Header="退出" Click="Exit_Click" InputGestureText="Alt+F4" />
+                    </MenuItem>
+                    <MenuItem Header="队列(_Q)">
+                        <MenuItem Header="全部取消" Command="{Binding CancelAllCommand}" />
+                        <MenuItem Header="全部中止接管" Command="{Binding CancelAllTakeoversCommand}" />
+                        <MenuItem Header="清理已完成" Command="{Binding ClearFinishedCommand}" />
+                        <Separator />
+                        <MenuItem Header="重新检测下载工具" Command="{Binding RefreshToolsCommand}" />
+                    </MenuItem>
+                    <MenuItem Header="工具(_T)">
+                        <MenuItem Header="打开内置浏览器…" Command="{Binding BrowserCommand}" InputGestureText="Ctrl+Shift+B" />
+                        <MenuItem Header="Cookie 管理…" Command="{Binding CookieManagerCommand}" InputGestureText="Ctrl+Shift+K" />
+                        <MenuItem Header="m3u8 转 MP4…" Command="{Binding ConverterCommand}" InputGestureText="Ctrl+Shift+M" />
+                    </MenuItem>
+                    <MenuItem Header="帮助(_H)">
+                        <MenuItem Header="什么是 yt-dlp / ffmpeg？" Click="About_Click" />
+                    </MenuItem>
+                </Menu>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource IconButton}" Content="&#xE774;" ToolTip="内置浏览器（Ctrl+Shift+B）"
+                            Command="{Binding BrowserCommand}" />
+                    <Button Style="{StaticResource IconButton}" Content="&#xE714;" ToolTip="m3u8 转 MP4（Ctrl+Shift+M）"
+                            Command="{Binding ConverterCommand}" Margin="2,0,0,0" />
+                    <Button Style="{StaticResource IconButton}" Content="&#xE713;" ToolTip="设置（Ctrl+,）"
+                            Command="{Binding SettingsCommand}" Margin="2,0,0,0" />
+                    <Border Width="1" Height="20" Background="{DynamicResource LineBrush}" Margin="8,0" />
+                    <Button Content="新增下载" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding AddDownloadCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="340" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- 侧栏 -->
-            <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}"
-                    BorderThickness="0,0,1,0">
+            <Border Grid.Column="0" Background="{DynamicResource SurfaceBrush}"
+                    BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,0,1,0">
                 <DockPanel>
-                    <Grid DockPanel.Dock="Top" Margin="16,14,16,10">
+                    <Grid DockPanel.Dock="Top" Margin="18,16,14,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Video Grabber" FontSize="15" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding QueueHeader}" Style="{StaticResource Caption}" Margin="0,2,0,0" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Width="34" Height="34" CornerRadius="8" Background="{DynamicResource AccentSoftBrush}">
+                                <TextBlock Text="&#xE714;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                           Foreground="{DynamicResource AccentBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Video Grabber" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="{Binding QueueHeader}" Style="{StaticResource Caption}" Margin="0,1,0,0" />
+                            </StackPanel>
                         </StackPanel>
-                        <Button Grid.Column="1" Content="新增下载" Style="{StaticResource PrimaryButton}"
-                                Command="{Binding AddDownloadCommand}" />
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE710;"
+                                ToolTip="新增下载（Ctrl+N）" Command="{Binding AddDownloadCommand}" />
                     </Grid>
 
-                    <Border DockPanel.Dock="Bottom" Margin="16,0,16,0" Padding="10,8" CornerRadius="6"
-                            Background="#EAF2FE" BorderBrush="#BFD8FA" BorderThickness="1"
+                    <Border DockPanel.Dock="Bottom" Margin="14,0,14,0" Padding="12,9" CornerRadius="8"
+                            Background="{DynamicResource AccentSoftBrush}"
                             Visibility="{Binding TakeoverBannerVisibility}">
                         <DockPanel>
-                            <Button DockPanel.Dock="Right" Content="全部中止接管" Style="{StaticResource BaseButton}"
+                            <Button DockPanel.Dock="Right" Content="全部中止" Style="{StaticResource PillButton}"
                                     Margin="8,0,0,0" Command="{Binding CancelAllTakeoversCommand}" />
                             <TextBlock Text="{Binding TakeoverSummary}" VerticalAlignment="Center"
-                                       FontSize="12" Foreground="#1559A6" TextWrapping="Wrap" />
+                                       FontSize="12" Foreground="{DynamicResource AccentBrush}" TextWrapping="Wrap" />
                         </DockPanel>
                     </Border>
 
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="16,10,16,14">
-                        <Button Content="全部取消" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
+                        <Button Content="全部取消" Style="{StaticResource SubtleButton}" Margin="0,0,4,0"
                                 Command="{Binding CancelAllCommand}" />
-                        <Button Content="清理已完成" Style="{StaticResource BaseButton}" Command="{Binding ClearFinishedCommand}" />
+                        <Button Content="清理已完成" Style="{StaticResource SubtleButton}"
+                                Command="{Binding ClearFinishedCommand}" />
                     </StackPanel>
 
                     <Grid>
                         <ListBox x:Name="JobList" ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob, Mode=TwoWay}"
                                  ItemTemplate="{StaticResource JobItemTemplate}" ItemContainerStyle="{StaticResource JobListItem}"
-                                 BorderThickness="0" Background="Transparent"
+                                 BorderThickness="0" Background="Transparent" Margin="6,0"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
-                        <TextBlock Text="{Binding QueueEmptyHint}" Style="{StaticResource Caption}" TextAlignment="Center"
-                                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="24,32,24,0"
-                                   Visibility="{Binding IsQueueEmpty, Converter={StaticResource BoolToVisibility}}" />
+
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="28"
+                                    Visibility="{Binding IsQueueEmpty, Converter={StaticResource BoolToVisibility}}">
+                            <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource CanvasBrush}"
+                                    HorizontalAlignment="Center">
+                                <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" FontSize="22"
+                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="队列还是空的" FontSize="14" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center" Margin="0,14,0,0" />
+                            <TextBlock Text="粘贴视频链接，或用内置浏览器嗅探媒体地址" Style="{StaticResource Caption}"
+                                       TextAlignment="Center" HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="220" />
+                            <Button Content="新增下载" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Center"
+                                    Margin="0,14,0,0" Command="{Binding AddDownloadCommand}" />
+                        </StackPanel>
                     </Grid>
                 </DockPanel>
             </Border>
@@ -316,44 +378,46 @@
             <!-- 详情 -->
             <Grid Grid.Column="1">
                 <ContentControl Content="{Binding SelectedJob}" />
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40"
                             Visibility="{Binding SelectedJob, Converter={StaticResource NullToVisibility}, ConverterParameter=invert}">
-                    <TextBlock Text="选择一个任务查看详情" FontSize="15" Foreground="{StaticResource SecondaryTextBrush}"
-                               HorizontalAlignment="Center" />
-                    <TextBlock Text="下载进度、失败原因、命令预览与完整日志都会显示在这里。" Style="{StaticResource Caption}"
-                               Margin="0,8,0,0" HorizontalAlignment="Center" />
+                    <Border Width="64" Height="64" CornerRadius="16" Background="{DynamicResource SurfaceBrush}"
+                            BorderBrush="{DynamicResource LineBrush}" BorderThickness="1" HorizontalAlignment="Center">
+                        <TextBlock Text="&#xE7C3;" FontFamily="{StaticResource IconFont}" FontSize="26"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="选择一个任务查看详情" FontSize="16" FontWeight="SemiBold"
+                               HorizontalAlignment="Center" Margin="0,16,0,0" />
+                    <TextBlock Text="下载进度、失败原因、命令预览与完整日志都会显示在这里。"
+                               Style="{StaticResource PageSubtitle}" TextAlignment="Center"
+                               HorizontalAlignment="Center" Margin="0,6,0,0" MaxWidth="320" />
                 </StackPanel>
             </Grid>
         </Grid>
 
         <!-- 状态栏 -->
-        <Border Grid.Row="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}"
-                BorderThickness="0,1,0,0" Padding="16,8">
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+                BorderThickness="0,1,0,0" Padding="16,7">
             <DockPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                    <Button Content="站点登录 / 验证" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
-                            ToolTip="打开内置浏览器（Ctrl+Shift+B）" Command="{Binding BrowserCommand}" />
-                    <Button Content="转换" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
-                            ToolTip="m3u8 转 MP4（Ctrl+Shift+M）" Command="{Binding ConverterCommand}" />
-                    <Button Content="重新检测" Style="{StaticResource BaseButton}" Margin="0,0,8,0"
-                            Command="{Binding RefreshToolsCommand}" />
-                    <Button Content="设置" Style="{StaticResource BaseButton}" Command="{Binding SettingsCommand}" />
-                </StackPanel>
+                <Button DockPanel.Dock="Right" Content="重新检测工具" Style="{StaticResource SubtleButton}"
+                        Command="{Binding RefreshToolsCommand}" />
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Ellipse Width="8" Height="8" Margin="0,0,8,0" VerticalAlignment="Center">
                         <Ellipse.Style>
                             <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="#3FA45B" />
+                                <Setter Property="Fill" Value="{DynamicResource SuccessBrush}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasToolWarning}" Value="True">
-                                        <Setter Property="Fill" Value="#D64545" />
+                                        <Setter Property="Fill" Value="{DynamicResource DangerBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Ellipse.Style>
                     </Ellipse>
                     <TextBlock Text="{Binding ToolStatusText}" Style="{StaticResource Caption}" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding ToolWarningText}" FontSize="12" Foreground="{StaticResource DangerBrush}"
+                    <TextBlock Text="{Binding ToolWarningText}" FontSize="12"
+                               Foreground="{DynamicResource DangerBrush}"
                                Margin="12,0,0,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                                Visibility="{Binding HasToolWarning, Converter={StaticResource BoolToVisibility}}" />
                 </StackPanel>

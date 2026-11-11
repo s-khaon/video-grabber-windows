@@ -48,6 +48,7 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        ThemeManager.Apply();
 
         Paths = new WindowsPathProvider();
         Settings = AppSettings.Load(Paths.SettingsDirectory, Paths.DownloadsDirectory);
@@ -78,6 +79,7 @@ public partial class App : Application
         ViewModel.BrowserForJobRequested += ShowBrowser;
 
         _window = new MainWindow { DataContext = ViewModel };
+        ThemeManager.Attach(_window);
         _window.Closing += OnMainWindowClosing;
         _window.Show();
 

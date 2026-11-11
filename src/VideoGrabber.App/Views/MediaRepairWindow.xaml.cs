@@ -1,4 +1,5 @@
 using System.Windows;
+using VideoGrabber.App.Platform;
 using VideoGrabber.Core.Services;
 
 namespace VideoGrabber.App.Views;
@@ -13,6 +14,7 @@ public partial class MediaRepairWindow : Window
     public MediaRepairWindow(MediaRepairService service, IReadOnlyList<string> files)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         _service = service;
         _files = files;
         Loaded += (_, _) => _ = RunAsync();

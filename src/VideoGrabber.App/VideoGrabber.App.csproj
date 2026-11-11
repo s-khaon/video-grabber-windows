@@ -10,7 +10,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>VideoGrabber</AssemblyName>
     <RootNamespace>VideoGrabber.App</RootNamespace>
-    <Version>0.2.0</Version>
+    <Version>0.2.2</Version>
     <!-- exe 文件图标（资源管理器 / 任务栏 / 快捷方式）。 -->
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>

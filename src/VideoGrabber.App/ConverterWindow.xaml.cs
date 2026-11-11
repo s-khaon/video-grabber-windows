@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using VideoGrabber.App.Platform;
 using VideoGrabber.Core.Abstractions;
 using VideoGrabber.Core.Models;
 using VideoGrabber.Core.Services;
@@ -18,6 +19,7 @@ public partial class ConverterWindow : Window
     public ConverterWindow(MediaConverter converter, AppSettings settings, IFilePicker picker)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         _converter = converter;
         _settings = settings;
         _picker = picker;

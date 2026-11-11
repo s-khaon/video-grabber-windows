@@ -13,6 +13,7 @@ public partial class CookieManagerWindow : Window
     public CookieManagerWindow(CookieStore cookies, BrowserDataService browserData)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         _cookies = cookies;
         _browserData = browserData;
         Loaded += (_, _) => RefreshList();

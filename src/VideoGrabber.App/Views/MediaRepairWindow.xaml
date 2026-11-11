@@ -5,30 +5,48 @@
         Icon="Assets/app.ico"
         Height="520" Width="760" MinHeight="360" MinWidth="560"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource CanvasBrush}"
-        FontFamily="{StaticResource AppFont}">
-    <Grid Margin="20">
+        Background="{DynamicResource CanvasBrush}"
+        FontFamily="{StaticResource AppFont}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontSize="13"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel>
-            <TextBlock Text="修复本地视频文件" FontSize="18" FontWeight="SemiBold" />
-            <TextBlock Text="先检查能否解码；能救的文件会原地无损重新封装，必要时转码。原文件损坏时保留修复后的新文件。"
-                       Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,6,0,0" />
-        </StackPanel>
+        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+                BorderThickness="0,0,0,1" Padding="24,18">
+            <StackPanel Orientation="Horizontal">
+                <Border Style="{StaticResource HeaderIconTile}">
+                    <TextBlock Text="&#xE895;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                               Foreground="{DynamicResource AccentBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Text="修复本地视频文件" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="先检查能否解码；能救的文件会原地无损重新封装，必要时转码。原文件损坏时保留修复后的新文件。"
+                               Style="{StaticResource PageSubtitle}" Margin="0,2,0,0" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
 
-        <TextBox x:Name="LogBox" Grid.Row="1" Margin="0,14,0,0" IsReadOnly="True"
-                 FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"
-                 VerticalScrollBarVisibility="Auto" Background="#FAFBFC" BorderBrush="{StaticResource LineBrush}" />
+        <TextBox x:Name="LogBox" Grid.Row="1" Margin="24,16" IsReadOnly="True"
+                 FontFamily="{StaticResource MonoFont}" FontSize="12" TextWrapping="Wrap"
+                 VerticalScrollBarVisibility="Auto" Background="{DynamicResource LogBackgroundBrush}" />
 
-        <DockPanel Grid.Row="2" Margin="0,14,0,0">
-            <Button x:Name="CloseButton" DockPanel.Dock="Right" Content="关闭" Width="96"
-                    Style="{StaticResource BaseButton}" Click="Close_Click" />
-            <ProgressBar x:Name="Progress" Height="6" VerticalAlignment="Center" Margin="0,0,16,0"
-                         Foreground="{StaticResource AccentBrush}" Background="#EDEFF2" BorderThickness="0" />
-        </DockPanel>
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,1,0,0" Padding="24,12">
+            <DockPanel>
+                <Button x:Name="CloseButton" DockPanel.Dock="Right" Content="关闭" Width="96"
+                        Style="{StaticResource BaseButton}" Click="Close_Click" />
+                <ProgressBar x:Name="Progress" Height="6" VerticalAlignment="Center" Margin="0,0,16,0"
+                             Foreground="{DynamicResource AccentBrush}"
+                             Background="{DynamicResource SubtleHoverBrush}" BorderThickness="0" />
+            </DockPanel>
+        </Border>
     </Grid>
 </Window>

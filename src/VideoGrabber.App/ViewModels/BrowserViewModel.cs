@@ -91,6 +91,7 @@ public sealed class BrowserViewModel : INotifyPropertyChanged
     private string _statusText = "";
     private string _cookieStatus = "";
     private string _shieldText = "拦截 0";
+    private string _shieldCountText = "0";
     private string _filter = "全部";
     private bool _sniffEnabled = true;
 
@@ -132,6 +133,16 @@ public sealed class BrowserViewModel : INotifyPropertyChanged
         get => _shieldText;
         set => Set(ref _shieldText, value);
     }
+
+    public string ShieldCountText
+    {
+        get => _shieldCountText;
+        set => Set(ref _shieldCountText, value);
+    }
+
+    public bool IsEmpty => Rows.Count == 0;
+
+    public Visibility EmptyVisibility => IsEmpty ? Visibility.Visible : Visibility.Collapsed;
 
     public string Filter
     {
@@ -300,6 +311,8 @@ public sealed class BrowserViewModel : INotifyPropertyChanged
             ? "还没有捕获到媒体地址。在左侧页面播放视频即可。"
             : $"共 {Rows.Count} 项 · 拦截数见右上角盾牌";
         OnPropertyChanged(nameof(StatusText));
+        OnPropertyChanged(nameof(IsEmpty));
+        OnPropertyChanged(nameof(EmptyVisibility));
     }
 
     private string DetailFor(MediaResource resource, HlsPlaylistInfo? info)

@@ -4,17 +4,23 @@
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="内置浏览器 · 资源嗅探"
         Icon="Assets/app.ico"
-        Height="760" Width="1240" MinHeight="520" MinWidth="920"
+        Height="780" Width="1280" MinHeight="540" MinWidth="960"
         WindowStartupLocation="CenterOwner"
-        Background="{StaticResource CanvasBrush}"
-        FontFamily="{StaticResource AppFont}">
+        Background="{DynamicResource CanvasBrush}"
+        FontFamily="{StaticResource AppFont}"
+        Foreground="{DynamicResource PrimaryTextBrush}"
+        FontSize="13"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Border Background="#FFFFFF" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,0,0,1" Padding="10,8">
+        <!-- 顶部工具栏：圆形图标按钮 + 地址胶囊 + 更多菜单 -->
+        <Border Background="{DynamicResource SurfaceBrush}" BorderBrush="{DynamicResource LineBrush}"
+                BorderThickness="0,0,0,1" Padding="10,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -22,183 +28,299 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="BackButton" Content="‹" Width="32" Style="{StaticResource BaseButton}" Click="Back_Click" ToolTip="后退" />
-                    <Button x:Name="ForwardButton" Content="›" Width="32" Margin="6,0,0,0" Style="{StaticResource BaseButton}" Click="Forward_Click" ToolTip="前进" />
-                    <Button Content="⟳" Width="32" Margin="6,0,10,0" Style="{StaticResource BaseButton}" Click="Reload_Click" ToolTip="刷新" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BackButton" Style="{StaticResource IconButton}" Content="&#xE72B;"
+                            ToolTip="后退" Click="Back_Click" />
+                    <Button x:Name="ForwardButton" Style="{StaticResource IconButton}" Content="&#xE72A;"
+                            Margin="2,0,0,0" ToolTip="前进" Click="Forward_Click" />
+                    <Button Style="{StaticResource IconButton}" Content="&#xE72C;" Margin="2,0,0,0"
+                            ToolTip="刷新" Click="Reload_Click" />
                 </StackPanel>
 
-                <TextBox x:Name="AddressBox" Grid.Column="1" Height="32" VerticalContentAlignment="Center"
-                         Padding="10,0" KeyDown="AddressBox_KeyDown"
-                         Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Grid.Column="1" Content="打开" Width="64" HorizontalAlignment="Right" Margin="0,0,6,0"
-                        Style="{StaticResource BaseButton}" Click="Go_Click" />
+                <Border Grid.Column="1" Height="36" CornerRadius="18" Margin="8,0"
+                        Background="{DynamicResource ControlFillBrush}"
+                        BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="SiteIcon" Text="&#xE774;" FontFamily="{StaticResource IconFont}"
+                                   FontSize="13" Margin="13,0,9,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SecondaryTextBrush}" />
+                        <Grid Grid.Column="1">
+                            <TextBox x:Name="AddressBox" Style="{StaticResource PillTextBox}"
+                                     VerticalContentAlignment="Center"
+                                     KeyDown="AddressBox_KeyDown"
+                                     Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                            <ProgressBar x:Name="PageProgress" Height="2" Width="90" Margin="0,0,0,5"
+                                         HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                         IsIndeterminate="True" Visibility="Collapsed" IsHitTestVisible="False" />
+                        </Grid>
+                    </Grid>
+                </Border>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="12,0,0,0">
-                    <Button Content="保存 Cookies" Style="{StaticResource BaseButton}" Click="SaveCookies_Click" />
-                    <Button Content="清理会话" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="ClearSession_Click" />
-                    <ToggleButton x:Name="ShieldButton" Content="{Binding ShieldText}" Margin="10,0,0,0" Padding="10,4"
-                                  Background="#F4F6F9" BorderBrush="{StaticResource LineBrush}"
-                                  ToolTip="广告拦截总开关；点击可临时关闭当前站点"
-                                  Click="Shield_Click" />
-                    <CheckBox Content="嗅探" Margin="12,0,0,0" VerticalAlignment="Center"
-                              IsChecked="{Binding SniffEnabled, Mode=TwoWay}" />
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="SnifferToolbarButton" Style="{StaticResource IconButton}" Content="&#xE71C;"
+                            Margin="0,0,4,0" ToolTip="展开资源嗅探" Click="ToggleSniffer_Click"
+                            Visibility="Collapsed" />
+
+                    <Grid Margin="2,0,4,0">
+                        <ToggleButton x:Name="ShieldButton" Style="{StaticResource IconToggleButton}"
+                                      Content="&#xE83D;" ToolTip="广告拦截总开关；点击可临时关闭当前站点"
+                                      Click="Shield_Click" />
+                        <Border Background="{DynamicResource AccentBrush}" CornerRadius="8" MinWidth="16" Height="16"
+                                Margin="0,0,-3,-2" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                IsHitTestVisible="False">
+                            <TextBlock Text="{Binding ShieldCountText}" FontSize="9" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentTextBrush}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,0" />
+                        </Border>
+                    </Grid>
+
+                    <Menu VerticalAlignment="Center">
+                        <MenuItem Header="&#xE712;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                  Padding="10,7" ToolTip="更多操作">
+                            <MenuItem Header="保存 Cookies" Click="SaveCookies_Click" />
+                            <MenuItem Header="清理会话与站点数据" Click="ClearSession_Click" />
+                            <Separator />
+                            <MenuItem Header="嗅探媒体地址" IsCheckable="True"
+                                      IsChecked="{Binding SniffEnabled, Mode=TwoWay}" />
+                            <MenuItem Header="对当前站点关闭广告拦截" Click="Shield_Click" />
+                        </MenuItem>
+                    </Menu>
                 </StackPanel>
             </Grid>
         </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="480" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="380" MinWidth="300" />
+                <ColumnDefinition Width="*" MinWidth="460" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition x:Name="SnifferColumn" Width="392" MinWidth="320" />
             </Grid.ColumnDefinitions>
 
             <wv2:WebView2 x:Name="Browser" Grid.Column="0" />
 
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" Background="#E6E9EE" />
+            <GridSplitter Grid.Column="1" Width="1" HorizontalAlignment="Stretch"
+                          Background="{DynamicResource LineBrush}" ResizeBehavior="PreviousAndNext" />
 
-            <Border Grid.Column="2" Background="#FBFCFD" BorderBrush="{StaticResource LineBrush}" BorderThickness="1,0,0,0">
-                <Grid Margin="14">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
+            <Border x:Name="SnifferPanel" Grid.Column="2" Background="{DynamicResource CanvasBrush}">
+                <Border Style="{StaticResource Card}" Margin="12" Padding="14">
                     <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel>
-                            <TextBlock Text="资源嗅探" FontSize="16" FontWeight="SemiBold" />
-                            <TextBlock Text="播放视频后这里会出现可下载的地址" Style="{StaticResource Caption}" />
-                        </StackPanel>
-                        <ComboBox Grid.Column="1" Width="92" VerticalAlignment="Center"
-                                  ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter, Mode=TwoWay}" />
-                        <Button Grid.Column="2" Content="清空" Margin="6,0,0,0" Style="{StaticResource BaseButton}" Click="ClearSniff_Click" />
-                    </Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="1" Text="{Binding CookieStatus}" Foreground="#1F7A3D"
-                               FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0" />
-
-                    <ListBox x:Name="ResourceList" Grid.Row="2" Margin="0,10,0,0"
-                             ItemsSource="{Binding Rows}" BorderThickness="0" Background="Transparent"
-                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                             HorizontalContentAlignment="Stretch">
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Padding" Value="0" />
-                                <Setter Property="Margin" Value="0,0,0,10" />
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#FFFFFF" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="8" Padding="10">
-                                    <StackPanel>
-                                        <DockPanel>
-                                            <Border DockPanel.Dock="Right" Background="#EAF4FF" CornerRadius="6" Padding="6,2"
-                                                    Visibility="{Binding HasBadge, Converter={StaticResource BoolToVisibility}}">
-                                                <TextBlock Text="{Binding Badge}" FontSize="11" Foreground="#1559A6" />
-                                            </Border>
-                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                        </DockPanel>
-                                        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,4,0,0" />
-                                        <TextBlock Text="{Binding Detail}" FontSize="12" Foreground="#5A6472" TextWrapping="Wrap"
-                                                   Margin="0,4,0,0" Visibility="{Binding DetailVisibility}" />
-
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0" Visibility="{Binding BlobHintVisibility}">
-                                            <TextBlock Text="blob 地址不能直接下载，可改用相关联的 m3u8。" Style="{StaticResource Caption}" VerticalAlignment="Center" />
-                                            <Button Content="用关联 m3u8 下载" Margin="8,0,0,0" Style="{StaticResource BaseButton}" Click="BlobDownload_Click" />
-                                        </StackPanel>
-
-                                        <ListBox ItemsSource="{Binding Variants}" Margin="0,8,0,0"
-                                                 SelectedItem="{Binding SelectedVariant, Mode=TwoWay}"
-                                                 Visibility="{Binding VariantVisibility}"
-                                                 Background="Transparent" BorderThickness="0" Focusable="False"
-                                                 ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                                                 HorizontalContentAlignment="Stretch">
-                                            <ListBox.ItemContainerStyle>
-                                                <Style TargetType="ListBoxItem">
-                                                    <Setter Property="Padding" Value="0" />
-                                                    <Setter Property="Margin" Value="0,2" />
-                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                                    <Setter Property="Template">
-                                                        <Setter.Value>
-                                                            <ControlTemplate TargetType="ListBoxItem">
-                                                                <ContentPresenter />
-                                                            </ControlTemplate>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Style>
-                                            </ListBox.ItemContainerStyle>
-                                            <ListBox.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border CornerRadius="6" Padding="8,6">
-                                                        <Border.Style>
-                                                            <Style TargetType="Border">
-                                                                <Setter Property="Background" Value="#F7F9FC" />
-                                                                <Setter Property="BorderBrush" Value="Transparent" />
-                                                                <Setter Property="BorderThickness" Value="1" />
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                        <Setter Property="Background" Value="#EAF2FE" />
-                                                                        <Setter Property="BorderBrush" Value="#1F6FEB" />
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Border.Style>
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="*" />
-                                                                <ColumnDefinition Width="Auto" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <StackPanel>
-                                                                <DockPanel>
-                                                                    <Border DockPanel.Dock="Right" Background="#FFF3D6" CornerRadius="5" Padding="5,1" Margin="6,0,0,0"
-                                                                            Visibility="{Binding HasBadge, Converter={StaticResource BoolToVisibility}}">
-                                                                        <TextBlock Text="{Binding Badge}" FontSize="10" Foreground="#8A5A00" />
-                                                                    </Border>
-                                                                    <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="12" />
-                                                                </DockPanel>
-                                                                <TextBlock Text="{Binding Technical}" Style="{StaticResource Caption}" />
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock Text="{Binding Duration}" Style="{StaticResource Caption}" Margin="0,0,8,0" />
-                                                                    <TextBlock Text="{Binding Size}" Style="{StaticResource Caption}" />
-                                                                </StackPanel>
-                                                            </StackPanel>
-                                                            <Button Grid.Column="1" Content="下载" Style="{StaticResource BaseButton}"
-                                                                    VerticalAlignment="Center" Click="VariantDownload_Click" />
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ListBox.ItemTemplate>
-                                        </ListBox>
-
-                                        <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Caption}"
-                                                   Foreground="#1559A6" Margin="0,6,0,0"
-                                                   Visibility="{Binding SelectionVisibility}" />
-
-                                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                                            <Button Content="复制" Style="{StaticResource BaseButton}" Click="Copy_Click" />
-                                            <Button Content="yt-dlp" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="DownloadYtDlp_Click" />
-                                            <Button Content="ffmpeg 直连" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="DownloadDirect_Click" />
-                                            <Button Content="转换为 mp4…" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="Convert_Click" />
-                                            <Button Content="重新解析" Style="{StaticResource BaseButton}" Margin="6,0,0,0" Click="Reinspect_Click" />
-                                        </StackPanel>
-                                    </StackPanel>
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE76C;"
+                                    Width="30" Height="30" ToolTip="收起资源嗅探" Click="ToggleSniffer_Click" />
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Width="30" Height="30" CornerRadius="8"
+                                        Background="{DynamicResource AccentSoftBrush}">
+                                    <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                               Foreground="{DynamicResource AccentBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
+                                <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="资源嗅探" FontSize="15" FontWeight="SemiBold" />
+                                    <TextBlock Text="边播放边抓取可下载地址" Style="{StaticResource Caption}" FontSize="11" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
 
-                    <TextBlock Grid.Row="3" Text="{Binding StatusText}" Style="{StaticResource Caption}" TextWrapping="Wrap" Margin="0,8,0,0" />
-                </Grid>
+                        <Grid Grid.Row="1" Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding CookieStatus}" Foreground="{DynamicResource SuccessBrush}"
+                                       FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" />
+                            <ComboBox Grid.Column="1" Width="92" Height="30" MinHeight="30" Padding="9,0,26,0"
+                                      ItemsSource="{Binding Filters}" SelectedItem="{Binding Filter, Mode=TwoWay}" />
+                            <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="&#xE74D;"
+                                    Width="30" Height="30" Margin="4,0,0,0" ToolTip="清空嗅探结果"
+                                    Click="ClearSniff_Click" />
+                        </Grid>
+
+                        <Grid Grid.Row="2" Margin="0,10,0,0">
+                            <ListBox x:Name="ResourceList" ItemsSource="{Binding Rows}"
+                                     BorderThickness="0" Background="Transparent"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                     HorizontalContentAlignment="Stretch">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,0,0,8" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListBoxItem">
+                                                    <ContentPresenter />
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource SurfaceBrush}"
+                                                BorderBrush="{DynamicResource LineBrush}" BorderThickness="1"
+                                                CornerRadius="10" Padding="12">
+                                            <StackPanel>
+                                                <DockPanel>
+                                                    <Border DockPanel.Dock="Right" Style="{StaticResource StatusPill}"
+                                                            Background="{DynamicResource AccentSoftBrush}"
+                                                            Visibility="{Binding HasBadge, Converter={StaticResource BoolToVisibility}}">
+                                                        <TextBlock Text="{Binding Badge}" FontSize="10"
+                                                                   Foreground="{DynamicResource AccentBrush}" />
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="13"
+                                                               TextTrimming="CharacterEllipsis" Margin="0,0,8,0" />
+                                                </DockPanel>
+                                                <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Caption}"
+                                                           Margin="0,4,0,0" />
+                                                <TextBlock Text="{Binding Detail}" FontSize="12"
+                                                           Foreground="{DynamicResource SecondaryTextBrush}"
+                                                           TextWrapping="Wrap" Margin="0,4,0,0"
+                                                           Visibility="{Binding DetailVisibility}" />
+
+                                                <Border Background="{DynamicResource WarningSoftBrush}"
+                                                        CornerRadius="6" Padding="10,7" Margin="0,8,0,0"
+                                                        Visibility="{Binding BlobHintVisibility}">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}"
+                                                                   FontSize="12" Foreground="{DynamicResource WarningBrush}"
+                                                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                                                        <TextBlock Text="blob 地址不能直接下载，可改用相关联的 m3u8。"
+                                                                   FontSize="12" Foreground="{DynamicResource WarningBrush}"
+                                                                   VerticalAlignment="Center" />
+                                                        <Button Content="用关联 m3u8 下载" Style="{StaticResource PillButton}"
+                                                                Margin="8,0,0,0" Click="BlobDownload_Click" />
+                                                    </StackPanel>
+                                                </Border>
+
+                                                <ListBox ItemsSource="{Binding Variants}" Margin="0,8,0,0"
+                                                         SelectedItem="{Binding SelectedVariant, Mode=TwoWay}"
+                                                         Visibility="{Binding VariantVisibility}"
+                                                         Background="Transparent" BorderThickness="0" Focusable="False"
+                                                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                                                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                         HorizontalContentAlignment="Stretch">
+                                                    <ListBox.ItemContainerStyle>
+                                                        <Style TargetType="ListBoxItem">
+                                                            <Setter Property="Padding" Value="0" />
+                                                            <Setter Property="Margin" Value="0,2" />
+                                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                                        <ContentPresenter />
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </ListBox.ItemContainerStyle>
+                                                    <ListBox.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border CornerRadius="6" Padding="10,7">
+                                                                <Border.Style>
+                                                                    <Style TargetType="Border">
+                                                                        <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}" />
+                                                                        <Setter Property="BorderBrush" Value="Transparent" />
+                                                                        <Setter Property="BorderThickness" Value="1" />
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                                <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                                                                                <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </Border.Style>
+                                                                <Grid>
+                                                                    <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="*" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                    </Grid.ColumnDefinitions>
+                                                                    <StackPanel>
+                                                                        <DockPanel>
+                                                                            <Border DockPanel.Dock="Right" Background="{DynamicResource WarningSoftBrush}"
+                                                                                    CornerRadius="5" Padding="5,1" Margin="6,0,0,0"
+                                                                                    Visibility="{Binding HasBadge, Converter={StaticResource BoolToVisibility}}">
+                                                                                <TextBlock Text="{Binding Badge}" FontSize="10"
+                                                                                           Foreground="{DynamicResource WarningBrush}" />
+                                                                            </Border>
+                                                                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="12" />
+                                                                        </DockPanel>
+                                                                        <TextBlock Text="{Binding Technical}" Style="{StaticResource Caption}" />
+                                                                        <StackPanel Orientation="Horizontal">
+                                                                            <TextBlock Text="{Binding Duration}" Style="{StaticResource Caption}" Margin="0,0,8,0" />
+                                                                            <TextBlock Text="{Binding Size}" Style="{StaticResource Caption}" />
+                                                                        </StackPanel>
+                                                                    </StackPanel>
+                                                                    <TextBlock Grid.Column="1" Text="&#xE73E;" FontFamily="{StaticResource IconFont}"
+                                                                               FontSize="12" VerticalAlignment="Center" Margin="8,0,0,0"
+                                                                               Foreground="{DynamicResource AccentBrush}"
+                                                                               Visibility="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Converter={StaticResource BoolToVisibility}}" />
+                                                                </Grid>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ListBox.ItemTemplate>
+                                                </ListBox>
+
+                                                <TextBlock Text="{Binding SelectionText}" Style="{StaticResource Caption}"
+                                                           Foreground="{DynamicResource AccentBrush}" Margin="0,6,0,0"
+                                                           Visibility="{Binding SelectionVisibility}" />
+
+                                                <WrapPanel Margin="0,9,0,0">
+                                                    <Button Content="下载" Style="{StaticResource PrimaryButton}"
+                                                            MinHeight="28" Padding="12,4" FontSize="12"
+                                                            Margin="0,0,6,6" Click="DownloadYtDlp_Click" />
+                                                    <Button Content="直连" Style="{StaticResource BaseButton}"
+                                                            MinHeight="28" Padding="10,4" FontSize="12"
+                                                            Margin="0,0,6,6" Click="DownloadDirect_Click" />
+                                                    <Button Content="转换为 mp4…" Style="{StaticResource BaseButton}"
+                                                            MinHeight="28" Padding="10,4" FontSize="12"
+                                                            Margin="0,0,6,6" Click="Convert_Click"
+                                                            Visibility="{Binding CanConvert, Converter={StaticResource BoolToVisibility}}" />
+                                                    <Button Content="复制" Style="{StaticResource SubtleButton}"
+                                                            MinHeight="28" Padding="8,4" FontSize="12"
+                                                            Margin="0,0,2,6" Click="Copy_Click" />
+                                                    <Button Content="重新解析" Style="{StaticResource SubtleButton}"
+                                                            MinHeight="28" Padding="8,4" FontSize="12"
+                                                            Margin="0,0,2,6" Click="Reinspect_Click" />
+                                                </WrapPanel>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                                        Visibility="{Binding EmptyVisibility}" Margin="20">
+                                <Border Width="52" Height="52" CornerRadius="26"
+                                        Background="{DynamicResource SurfaceBrush}" HorizontalAlignment="Center"
+                                        BorderBrush="{DynamicResource LineBrush}" BorderThickness="1">
+                                    <TextBlock Text="&#xE714;" FontFamily="{StaticResource IconFont}" FontSize="20"
+                                               Foreground="{DynamicResource SecondaryTextBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Text="还没有捕获到媒体地址" FontSize="13" FontWeight="SemiBold"
+                                           HorizontalAlignment="Center" Margin="0,12,0,0" />
+                                <TextBlock Text="在左侧页面播放视频，地址会自动出现在这里"
+                                           Style="{StaticResource Caption}" TextAlignment="Center"
+                                           HorizontalAlignment="Center" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Grid.Row="3" Text="{Binding StatusText}" Style="{StaticResource Caption}"
+                                   FontSize="11" TextTrimming="CharacterEllipsis" Margin="0,10,0,0" />
+                    </Grid>
+                </Border>
             </Border>
         </Grid>
     </Grid>

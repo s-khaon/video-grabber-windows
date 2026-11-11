@@ -1,4 +1,5 @@
 using System.Windows;
+using VideoGrabber.App.Platform;
 using VideoGrabber.App.ViewModels;
 using VideoGrabber.Core.Abstractions;
 using VideoGrabber.Core.Services;
@@ -12,6 +13,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow(AppSettings settings, ToolEnvironment tools)
     {
         InitializeComponent();
+        ThemeManager.Attach(this);
         var picker = ((App)Application.Current).FilePicker;
         _viewModel = new SettingsViewModel(settings, tools, picker);
         DataContext = _viewModel;
