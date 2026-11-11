@@ -1,4 +1,4 @@
-﻿﻿<Window x:Class="VideoGrabber.App.SettingsWindow"
+<Window x:Class="VideoGrabber.App.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="设置" Width="720" Height="760" MinHeight="560" MinWidth="640"

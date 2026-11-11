@@ -1,4 +1,4 @@
-﻿﻿using System.Windows;
+using System.Windows;
 using VideoGrabber.App.Platform;
 using VideoGrabber.App.ViewModels;
 using VideoGrabber.App.Views;

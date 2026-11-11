@@ -1,4 +1,4 @@
-﻿﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 using VideoGrabber.App.ViewModels;
 using VideoGrabber.Core.Abstractions;
